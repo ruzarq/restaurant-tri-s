@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ресторан "Три С" - Система заказов</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- ШАПКА -->
+        <div class="header">
+            <h1>🍽️ Ресторан "Три С"</h1>
+            <p>Система управления заказами</p>
+        </div>
+        
+        <!-- ПАНЕЛЬ УПРАВЛЕНИЯ -->
+        <div class="control-panel">
+            <button class="role-btn active" data-role="waiter">🍽️ Официант</button>
+            <button class="role-btn" data-role="cook">👨‍🍳 Кухня</button>
+            <button class="role-btn" data-role="manager">👔 Менеджер</button>
+        </div>
+        
+        <!-- ИНТЕРФЕЙС ОФИЦИАНТА -->
+        <div id="waiter-interface">
+            <div class="section">
+                <h2>🎯 Столики</h2>
+                <div class="table-grid" id="tableGrid">
+                    <!-- Столики загрузятся здесь -->
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2>📋 Меню</h2>
+                <div class="menu-categories" id="menuCategories">
+                    <!-- Категории меню -->
+                </div>
+                <div class="dishes-grid" id="dishesGrid">
+                    <!-- Блюда загрузятся здесь -->
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2>🛒 Текущий заказ</h2>
+                <div class="cart-items" id="cartItems">
+                    <!-- Товары в корзине -->
+                </div>
+                <div class="cart-total">
+                    Итого: <span id="cartTotal">0</span> ₽
+                </div>
+                <button class="action-btn" onclick="sendOrder()" style="width: 100%; margin-top: 1rem;">
+                    📤 Отправить на кухню
+                </button>
+            </div>
+        </div>
+        
+        <!-- ИНТЕРФЕЙС КУХНИ -->
+        <div id="cook-interface" class="hidden">
+            <div class="section">
+                <h2>👨‍🍳 Заказы на кухне</h2>
+                <div id="kitchenOrders">
+                    <!-- Заказы для кухни -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- ИНТЕРФЕЙС МЕНЕДЖЕРА -->
+        <div id="manager-interface" class="hidden">
+            <div class="section">
+                <h2>📊 Статистика</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalRevenue">0 ₽</div>
+                        <div class="stat-label">Выручка сегодня</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalOrders">0</div>
+                        <div class="stat-label">Заказов сегодня</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="occupiedTables">0</div>
+                        <div class="stat-label">Занято столиков</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2>📈 Популярные блюда</h2>
+                <div id="popularDishes">
+                    <!-- Популярные блюда -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- УВЕДОМЛЕНИЯ -->
+    <div class="notification" id="notification">
+        Сообщение системы
+    </div>
+
+    <!-- ПОДКЛЮЧЕНИЕ JS ФАЙЛОВ -->
+    <script src="data/config.js"></script>
+    <script src="js/tables.js"></script>
+    <script src="js/menu.js"></script>
+    <script src="js/orders.js"></script>
+    <script src="js/roles.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
