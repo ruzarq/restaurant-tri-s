@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ресторан "Три С" - Система заказов</title>
+    <style>
+        /* СБРОС СТИЛЕЙ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        /* ОСНОВНЫЕ СТИЛИ */
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        /* ШАПКА */
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 3px solid #f0f0f0;
+        }
+        
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header p {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+        }
+        
+        /* ПАНЕЛЬ УПРАВЛЕНИЯ */
+        .control-panel {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .role-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            background: #3498db;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .role-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .role-btn.active {
+            background: #e74c3c;
+        }
+        
+        /* СЕТКА СТОЛИКОВ */
+        .section {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        
+        .section h2 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .table-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .table {
+            border: 3px solid;
+            border-radius: 15px;
+            padding: 1.5rem 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .table::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: currentColor;
+        }
+        
+        .table.free {
+            border-color: #27ae60;
+            color: #27ae60;
+            background: linear-gradient(135deg, #d5f4e6, #a8e6cf);
+        }
+        
+        .table.occupied {
+            border-color: #e74c3c;
+            color: #e74c3c;
+            background: linear-gradient(135deg, #fadbd8, #f5b7b1);
+        }
+        
+        .table.reserved {
+            border-color: #f39c12;
+            color: #f39c12;
+            background: linear-gradient(135deg, #fef9e7, #fdebd0);
+        }
+        
+        .table:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        
+        .table-number {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .table-status {
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .table-capacity {
+            color: #666;
+            font-size: 0.8rem;
+        }
+        
+        /* МЕНЮ */
+        .menu-categories {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .category-btn {
+            padding: 0.5rem 1rem;
+            border: 2px solid #3498db;
+            border-radius: 20px;
+            background: white;
+            color: #3498db;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .category-btn.active {
+            background: #3498db;
+            color: white;
+        }
+        
+        .dishes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+        
+        .dish-card {
+            border: 2px solid #f0f0f0;
+            border-radius: 10px;
+            padding: 1rem;
+            transition: all 0.3s;
+            background: white;
+        }
+        
+        .dish-card:hover {
+            border-color: #3498db;
+            transform: translateY(-2px);
+        }
+        
+        .dish-name {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: #2c3e50;
+        }
+        
+        .dish-description {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .dish-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .dish-price {
+            color: #e74c3c;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        
+        .add-btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .add-btn:hover {
+            background: #219652;
+        }
+        
+        /* КОРЗИНА */
+        .cart-items {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 1rem;
+        }
+        
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .cart-item-info {
+            flex-grow: 1;
+        }
+        
+        .cart-item-name {
+            font-weight: bold;
+        }
+        
+        .cart-item-price {
+            color: #e74c3c;
+        }
+        
+        .cart-item-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .quantity-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            cursor: pointer;
+        }
+        
+        .remove-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 0.25rem 0.5rem;
+            cursor: pointer;
+        }
+        
+        .cart-total {
+            text-align: right;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #2c3e50;
+            padding-top: 1rem;
+            border-top: 2px solid #f0f0f0;
+        }
+        
+        /* СТАТИСТИКА */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            opacity: 0.9;
+        }
+        
+        /* АДАПТИВНОСТЬ */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .table-grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            }
+            
+            .dishes-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .control-panel {
+                justify-content: center;
+            }
+        }
+        
+        /* УВЕДОМЛЕНИЯ */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #27ae60;
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transform: translateX(150%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- ШАПКА -->
+        <div class="header">
+            <h1>🍽️ Ресторан "Три С"</h1>
+            <p>Система управления заказами - Полностью в браузере</p>
+        </div>
+        
+        <!-- ПАНЕЛЬ ВЫБОРА РОЛИ -->
+        <div class="control-panel">
+            <button class="role-btn active" onclick="setRole('waiter')">🍽️ Официант</button>
+            <button class="role-btn" onclick="setRole('cook')">👨‍🍳 Кухня</button>
+            <button class="role-btn" onclick="setRole('manager')">👔 Менеджер</button>
+        </div>
+        
+        <!-- ИНТЕРФЕЙС ОФИЦИАНТА -->
+        <div id="waiter-interface">
+            <div class="section">
+                <h2>🎯 Столики</h2>
+                <div class="table-grid" id="tableGrid">
+                    <!-- Столики загрузятся здесь -->
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2>📋 Меню</h2>
+                <div class="menu-categories">
+                    <button class="category-btn active" onclick="setCategory('all')">Все</button>
+                    <button class="category-btn" onclick="setCategory('starters')">Закуски</button>
+                    <button class="category-btn" onclick="setCategory('main')">Основные</button>
+                    <button class="category-btn" onclick="setCategory('desserts')">Десерты</button>
+                    <button class="category-btn" onclick="setCategory('drinks')">Напитки</button>
+                </div>
+                <div class="dishes-grid" id="dishesGrid">
+                    <!-- Блюда загрузятся здесь -->
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2>🛒 Текущий заказ</h2>
+                <div class="cart-items" id="cartItems">
+                    <!-- Товары в корзине -->
+                </div>
+                <div class="cart-total">
+                    Итого: <span id="cartTotal">0</span> ₽
+                </div>
+                <button class="add-btn" style="margin-top: 1rem; width: 100%;" onclick="sendOrder()">
+                    📤 Отправить на кухню
+                </button>
+            </div>
+        </div>
+        
+        <!-- ИНТЕРФЕЙС КУХНИ -->
+        <div id="cook-interface" class="hidden">
+            <div class="section">
+                <h2>👨‍🍳 Заказы на кухне</h2>
+                <div id="kitchenOrders">
+                    <!-- Заказы для кухни -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- ИНТЕРФЕЙС МЕНЕДЖЕРА -->
+        <div id="manager-interface" class="hidden">
+            <div class="section">
+                <h2>📊 Статистика</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalRevenue">0 ₽</div>
+                        <div class="stat-label">Выручка сегодня</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalOrders">0</div>
+                        <div class="stat-label">Заказов сегодня</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="occupiedTables">0</div>
+                        <div class="stat-label">Занято столиков</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- УВЕДОМЛЕНИЯ -->
+    <div class="notification" id="notification">
+        Сообщение системы
+    </div>
+
+    <script>
+        // ДАННЫЕ ПРИЛОЖЕНИЯ
+        const appData = {
+            currentRole: 'waiter',
+            currentCategory: 'all',
+            currentOrder: [],
+            orders: [],
+            
+            tables: [
+                { id: 1, number: 1, status: 'free', capacity: 4 },
+                { id: 2, number: 2, status: 'occupied', capacity: 2 },
+                { id: 3, number: 3, status: 'free', capacity: 6 },
+                { id: 4, number: 4, status: 'reserved', capacity: 4 },
+                { id: 5, number: 5, status: 'occupied', capacity: 8 },
+                { id: 6, number: 6, status: 'free', capacity: 2 }
+            ],
+            
+            dishes: [
+                { id: 1, name: 'Борщ', description: 'Свекольный суп со сметаной', price: 250, category: 'starters' },
+                { id: 2, name: 'Цезарь', description: 'Салат с курицей и соусом', price: 350, category: 'starters' },
+                { id: 3, name: 'Стейк', description: 'Говяжий стейк с овощами', price: 800, category: 'main' },
+                { id: 4, name: 'Паста', description: 'Карбонара с беконом', price: 450, category: 'main' },
+                { id: 5, name: 'Тирамису', description: 'Итальянский десерт', price: 300, category: 'desserts' },
+                { id: 6, name: 'Чизкейк', description: 'Нью-йоркский чизкейк', price: 280, category: 'desserts' },
+                { id: 7, name: 'Кофе', description: 'Эспрессо 30мл', price: 150, category: 'drinks' },
+                { id: 8, name: 'Сок', description: 'Апельсиновый фреш', price: 200, category: 'drinks' }
+            ]
+        };
+
+        // СОХРАНЕНИЕ ДАННЫХ В LOCALSTORAGE
+        function saveData() {
+            localStorage.setItem('restaurantData', JSON.stringify(appData));
+        }
+
+        function loadData() {
+            const saved = localStorage.getItem('restaurantData');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                Object.assign(appData, parsed);
+            }
+        }
+
+        // УВЕДОМЛЕНИЯ
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.style.background = type === 'success' ? '#27ae60' : '#e74c3c';
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // УПРАВЛЕНИЕ РОЛЯМИ
+        function setRole(role) {
+            appData.currentRole = role;
+            
+            // Обновляем кнопки
+            document.querySelectorAll('.role-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Показываем нужный интерфейс
+            document.getElementById('waiter-interface').classList.add('hidden');
+            document.getElementById('cook-interface').classList.add('hidden');
+            document.getElementById('manager-interface').classList.add('hidden');
+            
+            document.getElementById(`${role}-interface`).classList.remove('hidden');
+            
+            // Обновляем данные для роли
+            if (role === 'waiter') {
+                renderTables();
+                renderDishes();
+                renderCart();
+            } else if (role === 'cook') {
+                renderKitchenOrders();
+            } else if (role === 'manager') {
+                renderStats();
+            }
+            
+            saveData();
+        }
+
+        // ОТОБРАЖЕНИЕ СТОЛИКОВ
+        function renderTables() {
+            const tableGrid = document.getElementById('tableGrid');
+            tableGrid.innerHTML = '';
+            
+            appData.tables.forEach(table => {
+                const tableElement = document.createElement('div');
+                tableElement.className = `table ${table.status}`;
+                tableElement.innerHTML = `
+                    <div class="table-number">${table.number}</div>
+                    <div class="table-status">
+                        ${table.status === 'free' ? '🟢 Свободен' : 
+                          table.status === 'occupied' ? '🔴 Занят' : '🟡 Забронирован'}
+                    </div>
+                    <div class="table-capacity">👥 ${table.capacity} чел.</div>
+                `;
+                
+                tableElement.addEventListener('click', () => {
+                    if (table.status === 'free') {
+                        table.status = 'occupied';
+                        showNotification(`Столик ${table.number} занят`);
+                    } else if (table.status === 'occupied') {
+                        table.status = 'free';
+                        showNotification(`Столик ${table.number} свободен`);
+                    }
+                    renderTables();
+                    saveData();
+                });
+                
+                tableGrid.appendChild(tableElement);
+            });
+        }
+
+        // ОТОБРАЖЕНИЕ БЛЮД
+        function setCategory(category) {
+            appData.currentCategory = category;
+            
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            renderDishes();
+        }
+
+        function renderDishes() {
+            const dishesGrid = document.getElementById('dishesGrid');
+            dishesGrid.innerHTML = '';
+            
+            const filteredDishes = appData.currentCategory === 'all' 
+                ? appData.dishes 
+                : appData.dishes.filter(dish => dish.category === appData.currentCategory);
+            
+            filteredDishes.forEach(dish => {
+                const dishElement = document.createElement('div');
+                dishElement.className = 'dish-card';
+                dishElement.innerHTML = `
+                    <div class="dish-name">${dish.name}</div>
+                    <div class="dish-description">${dish.description}</div>
+                    <div class="dish-footer">
+                        <div class="dish-price">${dish.price} ₽</div>
+                        <button class="add-btn" onclick="addToCart(${dish.id})">+ Добавить</button>
+                    </div>
+                `;
+                dishesGrid.appendChild(dishElement);
+            });
+        }
+
+        // КОРЗИНА
+        function addToCart(dishId) {
+            const dish = appData.dishes.find(d => d.id === dishId);
+            const existingItem = appData.currentOrder.find(item => item.dish.id === dishId);
+            
+            if (existingItem) {
+                existingItem.quantity++;
+            } else {
+                appData.currentOrder.push({
+                    dish: dish,
+                    quantity: 1
+                });
+            }
+            
+            renderCart();
+            showNotification(`Добавлено: ${dish.name}`);
+        }
+
+        function removeFromCart(dishId) {
+            appData.currentOrder = appData.currentOrder.filter(item => item.dish.id !== dishId);
+            renderCart();
+        }
+
+        function updateQuantity(dishId, change) {
+            const item = appData.currentOrder.find(item => item.dish.id === dishId);
+            if (item) {
+                item.quantity += change;
+                if (item.quantity <= 0) {
+                    removeFromCart(dishId);
+                } else {
+                    renderCart();
+                }
+            }
+        }
+
+        function renderCart() {
+            const cartItems = document.getElementById('cartItems');
+            const cartTotal = document.getElementById('cartTotal');
+            
+            if (appData.currentOrder.length === 0) {
+                cartItems.innerHTML = '<div style="text-align: center; color: #999; padding: 2rem;">Корзина пуста</div>';
+                cartTotal.textContent = '0';
+                return;
+            }
+            
+            let total = 0;
+            cartItems.innerHTML = '';
+            
+            appData.currentOrder.forEach(item => {
+                const itemTotal = item.dish.price * item.quantity;
+                total += itemTotal;
+                
+                const cartItem = document.createElement('div');
+                cartItem.className = 'cart-item';
+                cartItem.innerHTML = `
+                    <div class="cart-item-info">
+                        <div class="cart-item-name">${item.dish.name}</div>
+                        <div class="cart-item-price">${item.dish.price} ₽ × ${item.quantity} = ${itemTotal} ₽</div>
+                    </div>
+                    <div class="cart-item-controls">
+                        <button class="quantity-btn" onclick="updateQuantity(${item.dish.id}, -1)">-</button>
+                        <span>${item.quantity}</span>
+                        <button class="quantity-btn" onclick="updateQuantity(${item.dish.id}, 1)">+</button>
+                        <button class="remove-btn" onclick="removeFromCart(${item.dish.id})">🗑️</button>
+                    </div>
+                `;
+                cartItems.appendChild(cartItem);
+            });
+            
+            cartTotal.textContent = total;
+        }
+
+        // ОТПРАВКА ЗАКАЗА
+        function sendOrder() {
+            if (appData.currentOrder.length === 0) {
+                showNotification('Добавьте блюда в заказ', 'error');
+                return;
+            }
+            
+            const newOrder = {
+                id: Date.now(),
+                items: [...appData.currentOrder],
+                status: 'cooking',
+                createdAt: new Date().toLocaleString(),
+                total: appData.currentOrder.reduce((sum, item) => sum + (item.dish.price * item.quantity), 0)
+            };
+            
+            appData.orders.push(newOrder);
+            appData.currentOrder = [];
+            
+            renderCart();
+            showNotification('Заказ отправлен на кухню!');
+            saveData();
+        }
+
+        // ИНТЕРФЕЙС КУХНИ
+        function renderKitchenOrders() {
+            const kitchenOrders = document.getElementById('kitchenOrders');
+            const activeOrders = appData.orders.filter(order => order.status === 'cooking');
+            
+            if (activeOrders.length === 0) {
+                kitchenOrders.innerHTML = '<div style="text-align: center; color: #999; padding: 2rem;">Нет активных заказов</div>';
+                return;
+            }
+            
+            kitchenOrders.innerHTML = '';
+            
+            activeOrders.forEach(order => {
+                const orderElement = document.createElement('div');
+                orderElement.className = 'section';
+                orderElement.style.marginBottom = '1rem';
+                
+                let itemsHtml = '';
+                order.items.forEach(item => {
+                    itemsHtml += `
+                        <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #f0f0f0;">
+                            <span>${item.dish.name} × ${item.quantity}</span>
+                            <span>${item.dish.price * item.quantity} ₽</span>
+                        </div>
+                    `;
+                });
+                
+                orderElement.innerHTML = `
+                    <h3>🆔 Заказ #${order.id} (${order.createdAt})</h3>
+                    ${itemsHtml}
+                    <div style="text-align: right; margin-top: 1rem; font-weight: bold;">
+                        Итого: ${order.total} ₽
+                    </div>
+                    <button class="add-btn" style="width: 100%; margin-top: 1rem;" onclick="completeOrder(${order.id})">
+                        ✅ Заказ готов
+                    </button>
+                `;
+                
+                kitchenOrders.appendChild(orderElement);
+            });
+        }
+
+        function completeOrder(orderId) {
+            const order = appData.orders.find(o => o.id === orderId);
+            if (order) {
+                order.status = 'completed';
+                showNotification('Заказ отмечен как готовый!');
+                renderKitchenOrders();
+                saveData();
+            }
+        }
+
+        // СТАТИСТИКА ДЛЯ МЕНЕДЖЕРА
+        function renderStats() {
+            const today = new Date().toDateString();
+            const todayOrders = appData.orders.filter(order => 
+                new Date(order.createdAt).toDateString() === today
+            );
+            
+            const totalRevenue = todayOrders.reduce((sum, order) => sum + order.total, 0);
+            const occupiedTables = appData.tables.filter(table => table.status === 'occupied').length;
+            
+            document.getElementById('totalRevenue').textContent = totalRevenue + ' ₽';
+            document.getElementById('totalOrders').textContent = todayOrders.length;
+            document.getElementById('occupiedTables').textContent = occupiedTables;
+        }
+
+        // ИНИЦИАЛИЗАЦИЯ
+        function init() {
+            loadData();
+            renderTables();
+            renderDishes();
+            renderCart();
+            renderStats();
+            
+            // Автосохранение каждые 30 секунд
+            setInterval(saveData, 30000);
+            
+            console.log('🍽️ Ресторан "Три С" загружен!');
+            console.log('Данные автоматически сохраняются в браузере');
+        }
+
+        // ЗАПУСК ПРИ ЗАГРУЗКЕ СТРАНИЦЫ
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
